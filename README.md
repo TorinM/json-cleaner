@@ -17,7 +17,7 @@ cargo install json-cleaner
 ### From a file
 
 ```bash
-json-cleaner [FILE PATh]
+json-cleaner [FILE PATH]
 ```
 
 ### From stdin

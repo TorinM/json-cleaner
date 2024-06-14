@@ -11,3 +11,5 @@ keywords = ["cli", "devops", "json"]
 categories = ["command-line-utilities"]
 
 [dependencies]
+regex = "1.10.5"
+serde_json = "1.0.117"
