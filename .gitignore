@@ -18,4 +18,4 @@ Cargo.lock
 /target
 
 # Test Files
-test.json
+*.json
