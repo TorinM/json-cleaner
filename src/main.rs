@@ -28,12 +28,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
         Some(input) => read::from_file(&input)?,
         None => read::from_stdin()?
     };
-    info!("Received input: {}", input);
+    if input.is_empty() {
+        warn!("No input provided.");
+        return Err("No input provided.".into())
+    }
 
-    let cleaned = match format::strip_non_json_characters(&input)
+    info!("Received input: `{}`", input);
+
+    let cleaned_json_strings = match format::strip_non_json_characters(&input)
     {
         Ok(cleaned) => {
-            info!("Cleaned input: {}", cleaned);
+            info!("Cleaned input.");
             cleaned
         },
         Err(e) => {
@@ -41,18 +46,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
             return Err(e.into())
         }
     };
+    if cleaned_json_strings.len() == 0 {
+        warn!("No valid JSON found in input.");
+        return Err("No valid JSON found in input.".into())
+    }
 
-    let json = format::format_to_json(&cleaned)?;
+    let formatted_json = format::format_valid_json(cleaned_json_strings)?;
+    if formatted_json.is_empty() {
+        warn!("No valid JSON found in input.");
+        return Err("No valid JSON found in input.".into())
+    }
 
     match cli::get_arg(&args, "output")
     {
         Some(output) => {
             info!("Writing to file {}.", output);
-            std::fs::write(output, json)?
+            std::fs::write(output, formatted_json)?
         },
         None => {
             info!("Writing to stdout.");
-            println!("{}", json)
+            println!("{}", formatted_json)
         }
     }
     Ok(())
