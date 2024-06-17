@@ -1,20 +1,42 @@
+use log::{info, warn};
 use std::io::{self, BufRead};
+use std::fs::File;
 
-pub fn from_file(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    println!("Reading from file");
-    Ok("Not implemented".to_string())
+fn read_lines<R: BufRead>(reader: R) -> Result<String, Box<dyn std::error::Error>> {
+    let mut result = String::new();
+    for line in reader.lines() {
+        let line = match line {
+            Ok(line) => line,
+            Err(e) => {
+                warn!("Error reading line: {}", e);
+                return Err(Box::new(e));
+            }
+        };
+        result.push_str(&line);
+    }
+    Ok(result)
 }
 
+pub fn from_file(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+    info!("Reading input from file {}.", file_path);
+
+    let file = File::open(file_path)?;
+    let reader = io::BufReader::new(file);
+    let content = read_lines(reader)?;
+
+    info!("Finished reading input from file.");
+
+    Ok(content)
+}
+
+
 pub fn from_stdin() -> Result<String, Box<dyn std::error::Error>> {
-    println!("Reading from stdin");
+    info!("Reading input from standard stdin.");
 
-    let mut lines_vec: Vec<String> = Vec::new();
+    let stdin = io::stdin().lock();
+    let result = read_lines(stdin)?;
 
-    let stdin = io::stdin();
-    for line in stdin.lock().lines() {
-        let line = line.expect("Could not read line from standard in");
-        lines_vec.push(line);
-    }
+    info!("Finished reading input from stdin.");
 
-    Ok(lines_vec.concat())
+    Ok(result)
 }
